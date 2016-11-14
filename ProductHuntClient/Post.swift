@@ -26,7 +26,12 @@ class Post: UIViewController {
     override func viewDidLoad() {
 
         let data = try? Data(contentsOf: URL(string: postImageVar)!)
-        postImage.image = UIImage(data: data!)
+        
+        DispatchQueue.global(qos: .utility).async {
+            DispatchQueue.main.async {
+                self.postImage.image = UIImage(data: data!)
+            }
+        }
         postTitle.text = postTitleVar
         postText.text = postTextVar
         

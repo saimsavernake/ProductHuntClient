@@ -18,27 +18,29 @@ class Main: UITableViewController {
     @IBOutlet var menuBarButton: UIBarButtonItem!
 
     
+    
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
+        
+        self.navigationItem.title = currentCategory
         
         menuBarButton.target = self.revealViewController()
         menuBarButton.action = #selector(SWRevealViewController.revealToggle(_:))
         self.view.addGestureRecognizer(self.revealViewController().panGestureRecognizer())
         
-        let urlString = "https://api.producthunt.com/v1/categories/\(self.currentCategory)/posts"
-        let token = "?access_token=591f99547f569b05ba7d8777e2e0824eea16c440292cce1f8dfb3952cc9937ff"
-        if let url = URL(string: (urlString+token)) {
-            if let data = try? Data(contentsOf: url) {
-                let json = JSON(data: data)
-                parse(json: json)
-            }
-        }
+        didRefresh()
         refreshFunc()
     }
     override func didReceiveMemoryWarning() {
         super.didReceiveMemoryWarning()
     }
 
+    
+    
+    
+    
 //MARK: - TableView
     override func tableView(_ tableView: UITableView, numberOfRowsInSection section: Int) -> Int {
         return self.posts.count
@@ -48,19 +50,20 @@ class Main: UITableViewController {
         let cell = Bundle.main.loadNibNamed("TableViewCell", owner: self, options: nil)?.first as! TableViewCell
         let post = posts[indexPath.row]
         
-        DispatchQueue.global(qos: .background).async {
+        cell.mainImageView.image = nil
+        if let data = try? Data(contentsOf: URL(string: post["img"]!)!) {
             DispatchQueue.main.async {
-                let data = try? Data(contentsOf: URL(string: post["img"]!)!)
-                cell.mainImageView.image = UIImage(data: data!)
+                let image = UIImage(data: data)
+                DispatchQueue.main.async {
+                    cell.mainImageView.image = image;
+                }
             }
         }
-        
         cell.mainTitle.text = post["name"]
         cell.mainVotes.text = "Votes - \(post["votes"]!)"
         cell.mainDescription.text = post["description"]
         
         return cell
-        
     }
     override func tableView(_ tableView: UITableView, heightForRowAt indexPath: IndexPath) -> CGFloat {
         return 139
@@ -117,7 +120,6 @@ class Main: UITableViewController {
                 parse(json: json)
             }
         }
-        
         self.tableView.reloadData()
         refreshControl?.endRefreshing()
     }
