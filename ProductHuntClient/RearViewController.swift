@@ -51,7 +51,7 @@ class RearViewController: UITableViewController {
         
         if segue.identifier == "ToMain" {
             if let indexPath = self.tableView.indexPathForSelectedRow {
-                var DestViewController = segue.destination as! UINavigationController
+                let DestViewController = segue.destination as! UINavigationController
                 let controller = DestViewController.topViewController as! Main
                 controller.currentCategory = categories[indexPath.row]["category"]!
             }
